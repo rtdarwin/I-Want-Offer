@@ -1,0 +1,7 @@
+# temporary files
+*.out
+*.swp
+*~
+
+CMakeLists.txt
+*.el
