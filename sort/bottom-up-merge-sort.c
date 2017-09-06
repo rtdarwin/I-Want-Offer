@@ -6,56 +6,44 @@
 int* aux_arr = NULL;
 
 // [lo, mid], [mid+1, hi]
-void mergeSortAux(int* arr, int lo, int hi);
 void merge(int* arr, int lo, int mid, int hi);
 
+// 自底向上的归并排序作用于『链表』型数据时不需要分配额外的空间，
+//   空间复杂度降为 O(1)
+//
 // ascendingly sort arr
 // return 1 if function sort the `arr' successfully
 //        0 if the arr has already sorted
 //       -1 if paramaters error
 int
-mergeSort(int* arr, int len)
+bottomUpMergeSort(int* arr, int len)
 {
-    if (arr == NULL || len == 0) {
+    if (arr == NULL || len == 0)
         return -1;
-    }
 
-    /*  1. 如果已经排序了，直接返回
-     *     c(T) = O(n)
-     *     c(S) = O(1)
-     */
-
-    int sorted = 1;
-    for (int i = 1; i < len; i++) {
-        if (arr[i] < arr[i - 1]) {
-            sorted = 0;
-            break;
-        }
-    }
-    if (sorted)
-        return 0;
-
-    /*  2. 开始归并排序
-     *     c(T) = O(nlgn)
-     *     c(S) = O(n)
+    /*  自底向上归并排序
+     *    c(T) = O(nlgn)
+     *    c(S) = O(n)
+     *
+     *  试验性的使用
+     *    - 测试要合并的两子数组是否已经有序
      */
 
     aux_arr = (int*)malloc(sizeof(int) * len);
-    mergeSortAux(arr, 0, len - 1);
+
+    for (int sz = 1; sz < len; sz *= 2) {
+        // 最后那个不恰好是 sz 大小的块处理很巧妙啊
+        for (int lo = 0; lo < len - sz; lo += sz + sz) {
+            int hi = lo + sz + sz - 1;
+            if (hi > len - 1)
+                hi = len - 1;
+            printf("lo, hi = %d, %d\n", lo, hi);
+            if (!(arr[lo + sz - 1] <= arr[lo + sz]))
+                merge(arr, lo, lo + sz - 1, hi);
+        }
+    }
 
     return 1;
-}
-
-void
-mergeSortAux(int* arr, int lo, int hi)
-{
-    if (lo == hi)
-        return;
-
-    int mid = lo + (hi - lo) / 2;
-    mergeSortAux(arr, lo, mid);
-    mergeSortAux(arr, mid + 1, hi);
-    merge(arr, lo, mid, hi);
 }
 
 void
@@ -86,7 +74,7 @@ int
 main()
 {
     int arr[] = { 9, 8, 7, 6, 5, 4, 1, 2, 3, 0 };
-    mergeSort(arr, 10);
+    bottomUpMergeSort(arr, 10);
 
     for (int i = 0; i < 10; i++) {
         printf("%d ", arr[i]);
